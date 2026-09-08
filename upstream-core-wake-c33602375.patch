@@ -1,0 +1,43 @@
+From c33602375dc3fb8fdb2a35bf5f31b4fa26cd59fe Mon Sep 17 00:00:00 2001
+From: Solomon Peachy <pizza@shaftnet.org>
+Date: Tue, 29 Jul 2025 20:25:01 -0400
+Subject: [PATCH] pp500x:  Switch to plain C sleep/wake code (instead of asm)
+
+Supposedly this is responsible for startup crashes on ipod1g/2g.
+
+Change-Id: I9d03ddc996f46db6fa782d1d8b1cd8baf9d23308
+---
+ firmware/target/arm/pp/thread-pp.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/firmware/target/arm/pp/thread-pp.c b/firmware/target/arm/pp/thread-pp.c
+index 0af8caa43a7..292ba9baa43 100644
+--- a/firmware/target/arm/pp/thread-pp.c
++++ b/firmware/target/arm/pp/thread-pp.c
+@@ -52,7 +52,7 @@ uintptr_t * const idle_stacks[NUM_CORES] =
+  * initializations.
+  *---------------------------------------------------------------------------
+  */
+-static void INIT_ATTR core_thread_init(unsigned int core) 
++static void INIT_ATTR core_thread_init(unsigned int core)
+ {
+     if (core == CPU)
+     {
+@@ -154,7 +154,7 @@ struct core_semaphores
+ 
+ static struct core_semaphores core_semaphores[NUM_CORES] IBSS_ATTR;
+ 
+-#if 1 /* Select ASM */
++#if 0 /* Select ASM */
+ /*---------------------------------------------------------------------------
+  * Put core in a power-saving state if waking list wasn't repopulated and if
+  * no other core requested a wakeup for it to perform a task.
+@@ -294,7 +294,7 @@ static inline void core_sleep(unsigned int core)
+         "mov    r0, r0, lsl %[c]           \n"
+         "str    r0, [%[mbx], #4]           \n" /* signal intent to sleep */
+         "ldr    r1, [%[mbx], #0]           \n" /* && !(MBX_MSG_STAT & (0x10<<core)) ? */
+-        "tst    r1, r0, lsl #2             \n"  
++        "tst    r1, r0, lsl #2             \n"
+         "moveq  r1, #0x80000000            \n" /* Then sleep */
+         "streq  r1, [%[ctl], %[c], lsl #2] \n"
+         "moveq  r1, #0                     \n" /* Clear control reg */

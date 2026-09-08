@@ -79,6 +79,17 @@ jobs:
           cd rockbox
           git apply --stat ../self/pp5002-sphinxmoth.patch
           git apply ../self/pp5002-sphinxmoth.patch
+          # Rockbox's own core-wake fix (c33602375, 2025-08-04): without it every
+          # 1G/2G build from an older ref (4.0 included) crashes at boot. Apply it
+          # when the ref predates it; skip when it is already upstream.
+          cw=../self/upstream-core-wake-c33602375.patch
+          if git apply --check "$cw" 2>/dev/null; then
+            git apply "$cw"; echo "core-wake fix applied (ref predates upstream commit c33602375)"
+          elif git apply --check -R "$cw" 2>/dev/null; then
+            echo "core-wake fix already upstream in this ref"
+          else
+            echo "core-wake patch neither applies nor is present: thread-pp.c changed upstream, inspect"; exit 1
+          fi
           git diff --stat
 
       - name: Host packages

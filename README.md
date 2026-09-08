@@ -51,7 +51,11 @@ what has actually been tested on hardware.
 ## Automated builds
 
 `.github/workflows/build.yml` builds Rockbox for `ipod1g2g` and `ipod3g`
-with the patch applied:
+with the patch applied. It also carries Rockbox's own core-wake fix
+(`upstream-core-wake-c33602375.patch`, the upstream commit verbatim) and
+applies it when the ref being built predates that commit, so 4.0-based
+builds do not inherit the boot crash; on newer refs it is detected as
+already present and skipped. The workflow runs:
 
 - **Weekly** (Monday 06:17 UTC): finds the newest upstream release tag
   (`vX.Y` or `vX.Y-final`) and, if there is no `rockbox-<tag>-sphinxmoth`
